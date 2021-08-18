@@ -1,3 +1,14 @@
+<?php
+// Initialize the session
+session_start();
+
+// Check if the user is logged in, if not then redirect him to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: login.php");
+    exit;
+};
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -30,6 +41,7 @@
     <link href="vendor/select2/select2.min.css" rel="stylesheet" media="all">
     <link href="vendor/perfect-scrollbar/perfect-scrollbar.css" rel="stylesheet" media="all">
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <!-- Main CSS-->
     <link href="css/theme.css" rel="stylesheet" media="all">
 
@@ -49,41 +61,39 @@
                     <div class="header__navbar">
                         <ul class="list-unstyled">
                             <li class="has-sub">
-                                 <a href="#">
-                                    <i class="fas fa-tachometer-alt"></i>
-                                    <span class="bot-line"></span>Dashboard</a>
+                                <a href="#">
+                                    <i class="fas fa-tachometer-alt"></i>Dashboard
+                                    <span class="bot-line"></span>
+                                </a>
+                                <ul class="header3-sub-list list-unstyled">
+                                    <li>
+                                        <a href="index.html">Dashboard 1</a>
+                                    </li>
+                                    <li>
+                                        <a href="index2.html">Dashboard 2</a>
+                                    </li>
+                                    <li>
+                                        <a href="index3.html">Dashboard 3</a>
+                                    </li>
+                                    <li>
+                                        <a href="index4.html">Dashboard 4</a>
+                                    </li>
+                                </ul>
                             </li>
                             <li>
                                 <a href="registro-vendedor.php">
                                     <i class="fas fa-shopping-basket"></i>
-                                    <span class="bot-line"></span>Tienda</a>
+                                    <span class="bot-line"></span>Registro de Vendedores</a>
                             </li>
                             <li>
-                                <a href="#">
+                                <a href="productos.php">
                                     <i class="fas fa-trophy"></i>
                                     <span class="bot-line"></span>Productos</a>
                             </li>
                             <li class="has-sub">
                                 <a href="#">
-                                    <i class="fas fa-copy"></i>
-                                    <span class="bot-line"></span>Pages</a>
-                                <ul class="header3-sub-list list-unstyled">
-                                    <li>
-                                        <a href="login.php">Login</a>
-                                    </li>
-                                    <li>
-                                        <a href="register2.php">Register</a>
-                                    </li>
-                                    <li>
-                                        <a href="forget-pass.html">Forget Password</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="has-sub">
-                                <a href="#">
                                     <i class="fas fa-desktop"></i>
-                                    <span class="bot-line"></span>Elementos</a>
-                                
+                                    <span class="bot-line"></span>UI Elements</a>
                             </li>
                         </ul>
                     </div>
@@ -93,57 +103,51 @@
                             <div class="setting-dropdown js-dropdown">
                                 <div class="account-dropdown__body">
                                     <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-account"></i>Account</a>
+                                        <a href="./update-account.php">
+                                            <i class="zmdi zmdi-account"></i>Actualizar cuenta</a>
                                     </div>
                                     <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-settings"></i>Setting</a>
+                                        <a href="./update-password.php">
+                                            <i class="zmdi zmdi-settings"></i>Reset Contraseña</a>
                                     </div>
-                                    <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-money-box"></i>Billing</a>
-                                    </div>
-                                </div>
-                                <div class="account-dropdown__body">
-                                    <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-globe"></i>Language</a>
-                                    </div>
-                                    <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-pin"></i>Location</a>
-                                    </div>
-                                    <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-email"></i>Email</a>
-                                    </div>
-                                    <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-notifications"></i>Notifications</a>
-                                    </div>
+
                                 </div>
                             </div>
                         </div>
                         <div class="account-wrap">
                             <div class="account-item account-item--style2 clearfix js-item-menu">
-                                
+                                <div class="image">
+                                    <img src="images/icon/avatar-01.jpg" alt="John Doe" />
+                                </div>
                                 <div class="content">
-                                    <a class="js-acc-btn" href="#">Login</a>
+                                    <a class="js-acc-btn" href="#"><?php echo htmlspecialchars($_SESSION["username"]); ?></a>
                                 </div>
                                 <div class="account-dropdown js-dropdown">
+                                    <div class="info clearfix">
+                                        <div class="image">
+                                            <a href="#">
+                                                <img src="images/icon/avatar-01.jpg" alt="John Doe" />
+                                            </a>
+                                        </div>
+                                        <div class="content">
+                                            <h5 class="name">
+                                                <a href="#"><?php echo htmlspecialchars($_SESSION["nombre"]); ?> <?php echo htmlspecialchars($_SESSION["apellido"]); ?></a>
+                                            </h5>
+                                            <span class="email"><?php echo htmlspecialchars($_SESSION["correo"]); ?></span>
+                                        </div>
+                                    </div>
                                     <div class="account-dropdown__body">
                                         <div class="account-dropdown__item">
-                                            <a href="login.php">
-                                                <i class="zmdi zmdi-account"></i>Login</a>
+                                            <a href="welcome.php">
+                                                <i class="zmdi zmdi-account"></i>Account</a>
                                         </div>
                                         <div class="account-dropdown__item">
-                                            <a href="register2.php">
-                                                <i class="zmdi zmdi-settings"></i>Register</a>
+                                            <a href="#">
+                                                <i class="zmdi zmdi-settings"></i>Setting</a>
                                         </div>
                                     </div>
                                     <div class="account-dropdown__footer">
-                                        <a href="#">
+                                        <a href="./logout.php">
                                             <i class="zmdi zmdi-power"></i>Logout</a>
                                     </div>
                                 </div>
@@ -270,6 +274,7 @@
                 </div>
             </nav>
         </header>
+
         <div class="sub-header-mobile-2 d-block d-lg-none">
             <div class="header__tool">
                 <div class="header-button-item has-noti js-item-menu">
@@ -395,142 +400,99 @@
         <!-- END HEADER MOBILE -->
 
         <!-- PAGE CONTENT-->
-        <div class="page-content--bgf7">
-
-            <!-- STATISTIC-->
-            <section class="statistic statistic2">
-                <div class="container">
+        <div class="main-content">
+            <div class="section__content section__content--p30">
+                <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-6 col-lg-3">
-                            <div class="statistic__item statistic__item--green">
-                                <h2 class="number">10,368</h2>
-                                <span class="desc">members online</span>
-                                <div class="icon">
-                                    <i class="zmdi zmdi-account-o"></i>
-                                </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <strong>Reset</strong> Password
                             </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3">
-                            <div class="statistic__item statistic__item--orange">
-                                <h2 class="number">388,688</h2>
-                                <span class="desc">items sold</span>
-                                <div class="icon">
-                                    <i class="zmdi zmdi-shopping-cart"></i>
-                                </div>
+                            <div class="card-body card-block" id="form-div">
+
+                                <script>
+                                    const vId = localStorage.getItem('tempId');
+                                    var formDiv = document.getElementById('form-div')
+                                    let currentV = {};
+                                    let vendedorValue;
+
+
+                                    $.ajax({
+                                        method:'GET',
+                                        url:`http://localhost:8080/api/single_read.php/?id=${vId}`,
+                                        success:function(response){
+                                            currentV = response
+                                            // buildTable(myArray)
+                                            console.log(currentV)
+
+                                            let formHtml=`
+                                <form action="" method="post" name="myForm">
+                                    <div class="form-group" id="lote-div">
+                                        <label for="nf-email" class=" form-control-label">Numero de Lote</label>
+                                        <input type="text" id="nf-email" name="fLote" placeholder="no. lote" class="form-control" pattern="\d*" maxlength="5" value=${currentV.lote}>
+                                    </div>
+                                    <div class="form-group" id="nombre-div">
+                                        <label for="nf-password" class=" form-control-label">Nombre del Responsable</label>
+                                        <input type="text" id="nf-password" name="fNombre" placeholder="Nombre" class="form-control" value=${currentV.nombre} >
+                                    </div>
+                                    <div class="form-group" id="apellido-div">
+                                        <label for="nf-password" class=" form-control-label">Apellido del Responsable</label>
+                                        <input type="text" id="nf-password" name="fApellido" placeholder="Apellido" class="form-control" value=${currentV.apellido}>
+                                    </div>
+                                    <div class="form-group" id="inicio-div">
+                                        <label for="nf-password" class=" form-control-label">Fecha de inicio de producción</label>
+                                        <input type="date" id="nf-password" name="fInicio" placeholder="Fecha inicio" class="form-control" value=${currentV.inicio}>
+                                    </div>
+                                    <div class="form-group" id="termino-div">
+                                        <label for="nf-password" class=" form-control-label">Fecha de terminación de producción</label>
+                                        <input type="date" id="nf-password" name="fTermino" placeholder="Fecha Terminacion" class="form-control" value=${currentV.terminacion}>
+                                    </div>
+                                    <div class="form-group" id="tipo-div">
+                                        <label for="tipo-id" class=" form-control-label">Tipo de piezas</label>
+                                        <select id="tipo-id" name="fTipo"  >
+                                            <option value="computadora">Computadora</option>
+                                            <option value="telefono">Telefono</option>
+                                            <option value="carro">Carro</option>
+                                            <option value="television" selected>Television</option>
+                                            <option value="radio" selected>Radio</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" id="num-div">
+                                        <label for="nf-password" class=" form-control-label">Número de piezas</label>
+                                        <input type="number" id="nf-password" name="fNum" placeholder="no. piezas" class="form-control" min="0" max="999" value=${currentV.numPieza}>
+                                    </div>
+                                    <div class="form-group" id="def-div">
+                                        <label for="nf-password" class=" form-control-label">Número de piezas defectuosas</label>
+                                        <input type="number" id="nf-password" name="fDef" placeholder="no. piezas defectuosas" class="form-control" min="0" max="999" value=${currentV.defPieza} >
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="btn btn-primary btn-sm" onclick="event.preventDefault(); validateUpdate(${currentV.id})">Actualizar</button>
+                                        <a class="btn btn-danger btn-sm" href="welcome.php">Cancel</a>
+
+                                    </div>
+                                </form>
+
+                                    `
+
+                                            formDiv.innerHTML += formHtml
+                                        }
+                                    })
+
+                                    // console.log(data);
+                                </script>
                             </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3">
-                            <div class="statistic__item statistic__item--blue">
-                                <h2 class="number">1,086</h2>
-                                <span class="desc">this week</span>
-                                <div class="icon">
-                                    <i class="zmdi zmdi-calendar-note"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3">
-                            <div class="statistic__item statistic__item--red">
-                                <h2 class="number">$1,060,386</h2>
-                                <span class="desc">total earnings</span>
-                                <div class="icon">
-                                    <i class="zmdi zmdi-money"></i>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                 </div>
-            </section>
-            <!-- END STATISTIC-->
-
-            <!-- STATISTIC CHART-->
-            <section class="statistic-chart">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h3 class="title-5 m-b-35">statistics</h3>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 col-lg-4">
-                            <!-- CHART-->
-                            <div class="statistic-chart-1">
-                                <h3 class="title-3 m-b-30">chart</h3>
-                                <div class="chart-wrap">
-                                    <canvas id="widgetChart5"></canvas>
-                                </div>
-                                <div class="statistic-chart-1-note">
-                                    <span class="big">10,368</span>
-                                    <span>/ 16220 items sold</span>
-                                </div>
-                            </div>
-                            <!-- END CHART-->
-                        </div>
-                        <div class="col-md-6 col-lg-4">
-                            <!-- TOP CAMPAIGN-->
-                            <div class="top-campaign">
-                                <h3 class="title-3 m-b-30">top campaigns</h3>
-                                <div class="table-responsive">
-                                    <table class="table table-top-campaign">
-                                        <tbody>
-                                            <tr>
-                                                <td>1. Australia</td>
-                                                <td>$70,261.65</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2. United Kingdom</td>
-                                                <td>$46,399.22</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3. Turkey</td>
-                                                <td>$35,364.90</td>
-                                            </tr>
-                                            <tr>
-                                                <td>4. Germany</td>
-                                                <td>$20,366.96</td>
-                                            </tr>
-                                            <tr>
-                                                <td>5. France</td>
-                                                <td>$10,366.96</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <!-- END TOP CAMPAIGN-->
-                        </div>
-                        <div class="col-md-6 col-lg-4">
-                            <!-- CHART PERCENT-->
-                            <div class="chart-percent-2">
-                                <h3 class="title-3 m-b-30">chart by %</h3>
-                                <div class="chart-wrap">
-                                    <canvas id="percent-chart2"></canvas>
-                                    <div id="chartjs-tooltip">
-                                        <table></table>
-                                    </div>
-                                </div>
-                                <div class="chart-info">
-                                    <div class="chart-note">
-                                        <span class="dot dot--blue"></span>
-                                        <span>products</span>
-                                    </div>
-                                    <div class="chart-note">
-                                        <span class="dot dot--red"></span>
-                                        <span>Services</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- END CHART PERCENT-->
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <!-- END STATISTIC CHART-->
+            </div>
         </div>
 
     </div>
 
     <!-- Jquery JS-->
     <script src="vendor/jquery-3.2.1.min.js"></script>
+    <script src="./js/vendedor-update.js"></script>
     <!-- Bootstrap JS-->
     <script src="vendor/bootstrap-4.1/popper.min.js"></script>
     <script src="vendor/bootstrap-4.1/bootstrap.min.js"></script>

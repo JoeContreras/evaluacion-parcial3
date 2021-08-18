@@ -1,3 +1,250 @@
+<?php
+// Initialize the session
+session_start();
+
+// Check if the user is logged in, otherwise redirect to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: login.php");
+    exit;
+}
+
+// Include config file
+require_once "config.php";
+
+// Define variables and initialize with empty values
+$curp = $nombre = $apellido = $direccion = $telefono = $correo = $username = $password = "";
+$curp_err = $nombre_err = "";
+
+// Processing form data when form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+
+    // Validate username
+    if (empty(trim($_POST["username"]))) {
+        $username_err = "Please enter a username.";
+    } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', trim($_POST["username"]))) {
+        $username_err = "Username can only contain letters, numbers, and underscores.";
+    } else {
+        // Prepare a select statement
+        $sql = "SELECT id FROM users WHERE username = :username";
+
+        if ($stmt = $pdo->prepare($sql)) {
+            // Bind variables to the prepared statement as parameters
+            $stmt->bindParam(":username", $param_username, PDO::PARAM_STR);
+
+            // Set parameters
+            $param_username = trim($_POST["username"]);
+
+            // Attempt to execute the prepared statement
+            if ($param_username == htmlspecialchars($_SESSION["username"])) {
+                $username = trim($_POST["username"]);
+            } else if ($stmt->execute()) {
+                if ($stmt->rowCount() == 1) {
+                    $username_err = "This username is already taken.";
+                } else {
+                    $username = trim($_POST["username"]);
+                }
+            } else {
+                echo "Oops! Something went wrong. Please try again later.";
+            }
+
+            // Close statement
+            unset($stmt);
+        }
+    }
+
+    // Validar correo
+    if (empty(trim($_POST["correo"]))) {
+        $correo_err = "Porfavor incluir un correo electronico";
+    } elseif (!preg_match('/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/', trim($_POST["correo"]))) {
+        $correo_err = "Porfavor incluir un correo electronico valido";
+    } else {
+        // Prepare a select statement
+        $sql = "SELECT id FROM users WHERE correo = :correo";
+
+        if ($stmt = $pdo->prepare($sql)) {
+            // Bind variables to the prepared statement as parameters
+            $stmt->bindParam(":correo", $param_correo, PDO::PARAM_STR);
+
+            // Set parameters
+            $param_correo = trim($_POST["correo"]);
+
+            // Attempt to execute the prepared statement
+           if ($param_correo == htmlspecialchars($_SESSION["correo"])) {
+                $correo = trim($_POST["correo"]);
+            } else if ($stmt->execute()) {
+                if ($stmt->rowCount() == 1) {
+                    $correo_err = "Este correo electronico ya existe";
+                } else {
+                    $correo = trim($_POST["correo"]);
+                    $correo = filter_var($correo, FILTER_VALIDATE_EMAIL);
+                    if ($correo === false) {
+                        exit('Invalid Email');
+                    }
+                }
+            } else {
+                echo "Algo salio mal. Porfavor intentalo mas tarde.";
+            }
+
+            // Close statement
+            unset($stmt);
+        }
+    }
+
+
+    // Validar curp
+    if (empty(trim($_POST["curp"]))) {
+        $curp_err = "Porfavor incluir tu CURP";
+    } elseif (!preg_match('/^([A-Z][AEIOUX][A-Z]{2}\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[HM](?:AS|B[CS]|C[CLMSH]|D[FG]|G[TR]|HG|JC|M[CNS]|N[ETL]|OC|PL|Q[TR]|S[PLR]|T[CSL]|VZ|YN|ZS)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d])(\d)$/', trim($_POST["curp"]))) {
+        $curp_err = "Porfavor incluir un CURP valido";
+    } else {
+        // Prepare a select statement
+        $sql = "SELECT id FROM users WHERE curp = :curp";
+
+        if ($stmt = $pdo->prepare($sql)) {
+            // Bind variables to the prepared statement as parameters
+            $stmt->bindParam(":curp", $param_curp, PDO::PARAM_STR);
+
+            // Set parameters
+            $param_curp = trim($_POST["curp"]);
+
+            if ($param_curp == htmlspecialchars($_SESSION["curp"])) {
+                $curp = trim($_POST["curp"]);
+            } else if ($stmt->execute()) {
+                if ($stmt->rowCount() == 1) {
+                    $curp_err = "Este CURP ya esta registrado";
+                } else {
+                    $curp = trim($_POST["curp"]);
+                }
+            } else {
+                echo "Algo salio mal. Porfavor intentalo mas tarde.";
+            }
+
+            // Close statement
+            unset($stmt);
+        }
+    }
+
+
+
+
+    // Validar telefono
+    if (empty(trim($_POST["telefono"]))) {
+        $telefono_err = "Porfavor incluir un numero de telefono";
+    } elseif (!preg_match('/^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/', trim($_POST["telefono"]))) {
+        $telefono_err = "Porfavor incluir un numero telefonico valido";
+    } else {
+        // Prepare a select statement
+        $sql = "SELECT id FROM users WHERE telefono = :telefono";
+
+        if ($stmt = $pdo->prepare($sql)) {
+            // Bind variables to the prepared statement as parameters
+            $stmt->bindParam(":telefono", $param_telefono, PDO::PARAM_STR);
+
+            // Set parameters
+            $param_telefono = trim($_POST["telefono"]);
+
+            if ($param_telefono == htmlspecialchars($_SESSION["telefono"])) {
+                $telefono = trim($_POST["telefono"]);
+            } else if ($stmt->execute()) {
+                if ($stmt->rowCount() == 1) {
+                    $telefono_err = "Este numero ya esta registrado";
+                } else {
+                    $telefono = trim($_POST["telefono"]);
+                    if (preg_match('^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$', $telefono)) {
+                        $telefono_err = "Porfavor incluir un numero telefonico valido!";
+                    }
+                }
+            } else {
+                echo "Algo salio mal. Porfavor intentalo mas tarde.";
+            }
+
+            // Close statement
+            unset($stmt);
+        }
+    }
+
+
+
+    // validar nombre
+    if (empty(trim($_POST["nombre"]))) {
+        $nombre_err = "Porfavor incluya su nombre";
+    } elseif (strlen(trim($_POST["nombre"])) > 20) {
+        $nombre_err = "El nombre no debe superar los 20 caracteres.";
+    } else {
+        $nombre = trim($_POST["nombre"]);
+    }
+
+    // Validar apellido
+    if (empty(trim($_POST["apellido"]))) {
+        $apellido_err = "Porfavor incluya su apellido";
+    } elseif (strlen(trim($_POST["apellido"])) > 30) {
+        $apellido_err = "El apellido no debe superar los 30 caracteres.";
+    } else {
+        $apellido = trim($_POST["apellido"]);
+    }
+
+    // Validar direccion
+    if (empty(trim($_POST["direccion"]))) {
+        $direccion_err = "Porfavor incluya su direccion";
+    } elseif (strlen(trim($_POST["direccion"])) > 40) {
+        $direccion_err = "La direccion no debe superar los 40 caracteres.";
+    } else {
+        $direccion = trim($_POST["direccion"]);
+    }
+
+
+
+    // Check input errors before updating the database
+    if (empty($curp_err) && empty($nombre_err)) {
+        // Prepare an update statement
+        $sql = "UPDATE users SET curp = :curp, nombre= :nombre, apellido= :apellido, telefono= :telefono, direccion= :direccion, correo= :correo, username= :username WHERE id = :id";
+
+        if ($stmt = $pdo->prepare($sql)) {
+            // Bind variables to the prepared statement as parameters
+            $stmt->bindParam(":curp", $param_curp, PDO::PARAM_STR);
+            $stmt->bindParam(":nombre", $param_nombre, PDO::PARAM_STR);
+            $stmt->bindParam(":apellido", $param_apellido, PDO::PARAM_STR);
+            $stmt->bindParam(":telefono", $param_telefono, PDO::PARAM_STR);
+            $stmt->bindParam(":direccion", $param_direccion, PDO::PARAM_STR);
+            $stmt->bindParam(":correo", $param_correo, PDO::PARAM_STR);
+            $stmt->bindParam(":username", $param_username, PDO::PARAM_STR);
+            $stmt->bindParam(":id", $param_id, PDO::PARAM_INT);
+
+            // Set parameters
+            /*             $param_password = password_hash($new_password, PASSWORD_DEFAULT); */
+            $param_curp = $curp;
+            $param_nombre = $nombre;
+            $param_apellido = $apellido;
+            $param_telefono = $telefono;
+            $param_direccion = $direccion;
+            $param_correo = $correo;
+            $param_username = $username;
+            $param_id = $_SESSION["id"];
+
+            // Attempt to execute the prepared statement
+            if ($stmt->execute()) {
+                // Password updated successfully. Destroy the session, and redirect to login page
+                session_destroy();
+                header("location: login.php");
+                exit();
+            } else {
+                echo "Oops! Something went wrong. Please try again later.";
+            }
+
+            // Close statement
+            unset($stmt);
+        }
+    }
+        /* 
+    // Close connection
+    unset($pdo) */;
+}
+?>
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -49,12 +296,27 @@
                     <div class="header__navbar">
                         <ul class="list-unstyled">
                             <li class="has-sub">
-                                 <a href="#">
-                                    <i class="fas fa-tachometer-alt"></i>
-                                    <span class="bot-line"></span>Dashboard</a>
+                                <a href="#">
+                                    <i class="fas fa-tachometer-alt"></i>Dashboard
+                                    <span class="bot-line"></span>
+                                </a>
+                                <ul class="header3-sub-list list-unstyled">
+                                    <li>
+                                        <a href="index.html">Dashboard 1</a>
+                                    </li>
+                                    <li>
+                                        <a href="index2.html">Dashboard 2</a>
+                                    </li>
+                                    <li>
+                                        <a href="index3.html">Dashboard 3</a>
+                                    </li>
+                                    <li>
+                                        <a href="index4.html">Dashboard 4</a>
+                                    </li>
+                                </ul>
                             </li>
                             <li>
-                                <a href="registro-vendedor.php">
+                                <a href="#">
                                     <i class="fas fa-shopping-basket"></i>
                                     <span class="bot-line"></span>Tienda</a>
                             </li>
@@ -65,25 +327,8 @@
                             </li>
                             <li class="has-sub">
                                 <a href="#">
-                                    <i class="fas fa-copy"></i>
-                                    <span class="bot-line"></span>Pages</a>
-                                <ul class="header3-sub-list list-unstyled">
-                                    <li>
-                                        <a href="login.php">Login</a>
-                                    </li>
-                                    <li>
-                                        <a href="register2.php">Register</a>
-                                    </li>
-                                    <li>
-                                        <a href="forget-pass.html">Forget Password</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="has-sub">
-                                <a href="#">
                                     <i class="fas fa-desktop"></i>
-                                    <span class="bot-line"></span>Elementos</a>
-                                
+                                    <span class="bot-line"></span>UI Elements</a>
                             </li>
                         </ul>
                     </div>
@@ -93,57 +338,51 @@
                             <div class="setting-dropdown js-dropdown">
                                 <div class="account-dropdown__body">
                                     <div class="account-dropdown__item">
-                                        <a href="#">
+                                        <a href="./welcome.php">
                                             <i class="zmdi zmdi-account"></i>Account</a>
                                     </div>
                                     <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-settings"></i>Setting</a>
+                                        <a href="./update-password.php">
+                                            <i class="zmdi zmdi-settings"></i>Reset Password</a>
                                     </div>
-                                    <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-money-box"></i>Billing</a>
-                                    </div>
-                                </div>
-                                <div class="account-dropdown__body">
-                                    <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-globe"></i>Language</a>
-                                    </div>
-                                    <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-pin"></i>Location</a>
-                                    </div>
-                                    <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-email"></i>Email</a>
-                                    </div>
-                                    <div class="account-dropdown__item">
-                                        <a href="#">
-                                            <i class="zmdi zmdi-notifications"></i>Notifications</a>
-                                    </div>
+
                                 </div>
                             </div>
                         </div>
                         <div class="account-wrap">
                             <div class="account-item account-item--style2 clearfix js-item-menu">
-                                
+                                <div class="image">
+                                    <img src="images/icon/avatar-01.jpg" alt="John Doe" />
+                                </div>
                                 <div class="content">
-                                    <a class="js-acc-btn" href="#">Login</a>
+                                    <a class="js-acc-btn" href="#"><?php echo htmlspecialchars($_SESSION["username"]); ?></a>
                                 </div>
                                 <div class="account-dropdown js-dropdown">
+                                    <div class="info clearfix">
+                                        <div class="image">
+                                            <a href="#">
+                                                <img src="images/icon/avatar-01.jpg" alt="John Doe" />
+                                            </a>
+                                        </div>
+                                        <div class="content">
+                                            <h5 class="name">
+                                                <a href="#"><?php echo htmlspecialchars($_SESSION["nombre"]); ?> <?php echo htmlspecialchars($_SESSION["apellido"]); ?></a>
+                                            </h5>
+                                            <span class="email"><?php echo htmlspecialchars($_SESSION["correo"]); ?></span>
+                                        </div>
+                                    </div>
                                     <div class="account-dropdown__body">
                                         <div class="account-dropdown__item">
-                                            <a href="login.php">
-                                                <i class="zmdi zmdi-account"></i>Login</a>
+                                            <a href="./welcome.php">
+                                                <i class="zmdi zmdi-account"></i>Account</a>
                                         </div>
                                         <div class="account-dropdown__item">
-                                            <a href="register2.php">
-                                                <i class="zmdi zmdi-settings"></i>Register</a>
+                                            <a href="#">
+                                                <i class="zmdi zmdi-settings"></i>Setting</a>
                                         </div>
                                     </div>
                                     <div class="account-dropdown__footer">
-                                        <a href="#">
+                                        <a href="./logout.php">
                                             <i class="zmdi zmdi-power"></i>Logout</a>
                                     </div>
                                 </div>
@@ -395,136 +634,63 @@
         <!-- END HEADER MOBILE -->
 
         <!-- PAGE CONTENT-->
-        <div class="page-content--bgf7">
-
-            <!-- STATISTIC-->
-            <section class="statistic statistic2">
-                <div class="container">
+        <div class="main-content">
+            <div class="section__content section__content--p30">
+                <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-6 col-lg-3">
-                            <div class="statistic__item statistic__item--green">
-                                <h2 class="number">10,368</h2>
-                                <span class="desc">members online</span>
-                                <div class="icon">
-                                    <i class="zmdi zmdi-account-o"></i>
-                                </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <strong>Reset</strong> Password
                             </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3">
-                            <div class="statistic__item statistic__item--orange">
-                                <h2 class="number">388,688</h2>
-                                <span class="desc">items sold</span>
-                                <div class="icon">
-                                    <i class="zmdi zmdi-shopping-cart"></i>
-                                </div>
+                            <div class="card-body card-block">
+                                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                                    <div class="form-group">
+                                        <label for="nf-email" class=" form-control-label">Nuevo CURP</label>
+                                        <input type="text" id="nf-email" name="curp" placeholder="CURP" class="form-control" value="<?php echo (!empty($curp)) ? $curp : htmlspecialchars($_SESSION["curp"]); ?>">
+                                        <span class="<?php echo (!empty($curp_err)) ? 'alert-danger' : 'help-block'; ?>"><?php echo (!empty($curp_err)) ? $curp_err : 'Porfavor incluya su CURP'; ?></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nf-password" class=" form-control-label">Nuevo Nombre</label>
+                                        <input type="text" id="nf-password" name="nombre" placeholder="Nombre" class="form-control" value="<?php echo (!empty($nombre)) ? $nombre : htmlspecialchars($_SESSION["nombre"]); ?>">
+                                        <span class="<?php echo (!empty($nombre_err)) ? 'alert-danger' : 'help-block'; ?>"><?php echo (!empty($nombre_err)) ? $nombre_err : 'Porfavor incluya su Nombre'; ?></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nf-password" class=" form-control-label">Nuevo Apellido</label>
+                                        <input type="text" id="nf-password" name="apellido" placeholder="Apellido" class="form-control" value="<?php echo (!empty($apellido)) ? $apellido : htmlspecialchars($_SESSION["apellido"]); ?>">
+                                        <span class="<?php echo (!empty($apellido_err)) ? 'alert-danger' : 'help-block'; ?>"><?php echo (!empty($apellido_err)) ? $apellido_err : 'Porfavor incluya su Apellido'; ?></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nf-password" class=" form-control-label">Nuevo Telefono</label>
+                                        <input type="tel" id="nf-password" name="telefono" placeholder="Numero Telefonico" class="form-control" value="<?php echo (!empty($telefono)) ? $telefono : htmlspecialchars($_SESSION["telefono"]); ?>">
+                                        <span class="<?php echo (!empty($telefono_err)) ? 'alert-danger' : 'help-block'; ?>"><?php echo (!empty($telefono_err)) ? $telefono_err : 'Porfavor incluya su Numero Telefonico'; ?></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nf-password" class=" form-control-label">Nueva Direccion</label>
+                                        <input type="text" id="nf-password" name="direccion" placeholder="Direccion" class="form-control" value="<?php echo (!empty($direccion)) ? $direccion : htmlspecialchars($_SESSION["direccion"]); ?>">
+                                        <span class="<?php echo (!empty($direccion_err)) ? 'alert-danger' : 'help-block'; ?>"><?php echo (!empty($direccion_err)) ? $direccion_err : 'Porfavor incluya su Direccion'; ?></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nf-password" class=" form-control-label">Nuevo Email</label>
+                                        <input type="text" id="nf-password" name="correo" placeholder="Email" class="form-control" value="<?php echo (!empty($correo)) ? $correo : htmlspecialchars($_SESSION["correo"]); ?>">
+                                        <span class="<?php echo (!empty($correo_err)) ? 'alert-danger' : 'help-block'; ?>"><?php echo (!empty($correo_err)) ? $correo_err : 'Porfavor incluya su Correo Electronico'; ?></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nf-password" class=" form-control-label">Nuevo Nombre de Usuario</label>
+                                        <input type="text" id="nf-password" name="username" placeholder="Username" class="form-control" value="<?php echo (!empty($username)) ? $username : htmlspecialchars($_SESSION["username"]); ?>">
+                                        <span class="<?php echo (!empty($username_err)) ? 'alert-danger' : 'help-block'; ?>"><?php echo (!empty($username_err)) ? $username_err : 'Porfavor incluya su Nombre de usuario'; ?></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <input class="btn btn-primary btn-sm" type="submit" value="Submit">
+                                        <a class="btn btn-danger btn-sm" href="welcome.php">Cancel</a>
+
+                                    </div>
+                                </form>
                             </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3">
-                            <div class="statistic__item statistic__item--blue">
-                                <h2 class="number">1,086</h2>
-                                <span class="desc">this week</span>
-                                <div class="icon">
-                                    <i class="zmdi zmdi-calendar-note"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3">
-                            <div class="statistic__item statistic__item--red">
-                                <h2 class="number">$1,060,386</h2>
-                                <span class="desc">total earnings</span>
-                                <div class="icon">
-                                    <i class="zmdi zmdi-money"></i>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                 </div>
-            </section>
-            <!-- END STATISTIC-->
-
-            <!-- STATISTIC CHART-->
-            <section class="statistic-chart">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h3 class="title-5 m-b-35">statistics</h3>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 col-lg-4">
-                            <!-- CHART-->
-                            <div class="statistic-chart-1">
-                                <h3 class="title-3 m-b-30">chart</h3>
-                                <div class="chart-wrap">
-                                    <canvas id="widgetChart5"></canvas>
-                                </div>
-                                <div class="statistic-chart-1-note">
-                                    <span class="big">10,368</span>
-                                    <span>/ 16220 items sold</span>
-                                </div>
-                            </div>
-                            <!-- END CHART-->
-                        </div>
-                        <div class="col-md-6 col-lg-4">
-                            <!-- TOP CAMPAIGN-->
-                            <div class="top-campaign">
-                                <h3 class="title-3 m-b-30">top campaigns</h3>
-                                <div class="table-responsive">
-                                    <table class="table table-top-campaign">
-                                        <tbody>
-                                            <tr>
-                                                <td>1. Australia</td>
-                                                <td>$70,261.65</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2. United Kingdom</td>
-                                                <td>$46,399.22</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3. Turkey</td>
-                                                <td>$35,364.90</td>
-                                            </tr>
-                                            <tr>
-                                                <td>4. Germany</td>
-                                                <td>$20,366.96</td>
-                                            </tr>
-                                            <tr>
-                                                <td>5. France</td>
-                                                <td>$10,366.96</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <!-- END TOP CAMPAIGN-->
-                        </div>
-                        <div class="col-md-6 col-lg-4">
-                            <!-- CHART PERCENT-->
-                            <div class="chart-percent-2">
-                                <h3 class="title-3 m-b-30">chart by %</h3>
-                                <div class="chart-wrap">
-                                    <canvas id="percent-chart2"></canvas>
-                                    <div id="chartjs-tooltip">
-                                        <table></table>
-                                    </div>
-                                </div>
-                                <div class="chart-info">
-                                    <div class="chart-note">
-                                        <span class="dot dot--blue"></span>
-                                        <span>products</span>
-                                    </div>
-                                    <div class="chart-note">
-                                        <span class="dot dot--red"></span>
-                                        <span>Services</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- END CHART PERCENT-->
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <!-- END STATISTIC CHART-->
+            </div>
         </div>
 
     </div>
